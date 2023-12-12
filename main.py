@@ -198,7 +198,7 @@ import mysql.connector
 # MySQL configurations
 hostname = 'localhost'
 username = 'root'
-password = '@Xr1990725'
+password = 'kkk'
 database_name = 'housing_project'
 csv_file_path = 'combined_data.csv'
 
