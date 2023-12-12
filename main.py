@@ -8,38 +8,42 @@ import random
 from files import state_file_path
 
 try:
-    df = pd.read_csv(state_file_path)
+    df = pd.read_csv(state_file_path)  # Reading the 'zip-city-county-state' into a Pandas DataFrame
 
+    # Cleaning functions for 'guid' and 'zip_code' columns
     def clean_guid(row):
-        guid = str(row['guid'])
+        guid = str(row['guid'])   # Function to clean 'guid' column
         if len(guid) != 36:
             return None
         return guid
 
     def clean_zip_code(row):
+        # Function to clean 'zip_code' column
         zip_code = str(row['zip_code'])
         if len(zip_code) != 5 or not zip_code.isdigit():
             state = row['state']
 
-            # Find the row with the same state in the dataset (excluding the current row)
+            # Finding nearby state ZIP code if current ZIP is invalid
             matching_state = df[(df['state'] == state) & (df['zip_code'].apply(lambda x: str(x).isdigit()))]
-
             if not matching_state.empty:
+                # Manipulating ZIP code to create a new one
                 nearby_state_zip = str(matching_state.iloc[-1]['zip_code'])
                 first_digit = nearby_state_zip[0]
                 new_zip = first_digit + '0000'
                 return int(new_zip)
             else:
                 # If no valid nearby state ZIP code is found, return None (empty value)
-                return None
+                return None  # If no valid nearby state ZIP code is found
 
-        return int(zip_code)
+        return int(zip_code) # Converting zip_code to int if valid
 
+    # Applying cleaning functions to DataFrame columns
     df['guid'] = df.apply(clean_guid, axis=1)
     df.dropna(subset=['guid'], inplace=True)
 
     df['zip_code'] = df.apply(clean_zip_code, axis=1)
 
+    # Saving the cleaned DataFrame to a new CSV file
     cleaned_file_path = 'cleaned_zip_city_county_state.csv'
     df.to_csv(cleaned_file_path, index=False)
 
@@ -51,17 +55,8 @@ except Exception as e:
     print(f"An error occurred: {e}")
 
 
-
-# Define the cleaning function for the 'median_income' column
-
-
+# Similar cleaning and processing done for 'income-info' data
 from files import income_file_path
-
-def clean_guid(row):
-    guid = str(row['guid'])
-    if len(guid) != 36:
-        return None
-    return guid
 
 def clean_median_income(income):
     try:
@@ -97,14 +92,8 @@ except ValueError as e:
 except Exception as e:
     print(f"An error occurred: {e}")
 
-
+# Similar cleaning and processing done for 'housing-info' data
 from files import housing_file_path
-
-def clean_guid(row):
-    guid = str(row['guid'])
-    if len(guid) != 36:
-        return None
-    return guid
 
 def clean_housing_median_age(age):
     try:
@@ -162,17 +151,14 @@ def clean_median_house_value(value):
 
 try:
     housing_df = pd.read_csv(housing_file_path)
-
     housing_df['guid'] = housing_df.apply(clean_guid, axis=1)
     housing_df.dropna(subset=['guid'], inplace=True)
-
     housing_df['housing_median_age'] = housing_df['housing_median_age'].apply(clean_housing_median_age)
     housing_df['total_rooms'] = housing_df['total_rooms'].apply(clean_total_rooms)
     housing_df['total_bedrooms'] = housing_df['total_bedrooms'].apply(clean_total_bedrooms)
     housing_df['population'] = housing_df['population'].apply(clean_population)
     housing_df['households'] = housing_df['households'].apply(clean_households)
     housing_df['median_house_value'] = housing_df['median_house_value'].apply(clean_median_house_value)
-
     housing_df.drop('zip_code', axis=1, inplace=True)
 
     cleaned_file_path = 'cleaned_housing_data.csv'
@@ -212,9 +198,9 @@ import mysql.connector
 # MySQL configurations
 hostname = 'localhost'
 username = 'root'
-password = 'ff'
+password = '@Xr1990725'
 database_name = 'housing_project'
-csv_file_path = 'combined_data.csv'  # Assuming the file is in the project directory
+csv_file_path = 'combined_data.csv'
 
 try:
     # Establish MySQL connection
@@ -260,7 +246,7 @@ except pd.errors.EmptyDataError as e:
 except Exception as e:
     print(f"An error occurred: {e}")
 
-
+# Printing what need to be displayed
 import time
 
 try:
@@ -272,7 +258,6 @@ try:
     print(f"{num_records_imported} records imported into the database")
 
     # Similar printing and sleep for Income and ZIP File data...
-
     time.sleep(2)  # Pause for 2 seconds after printing
     print("Import completed")
     time.sleep(2)  # Pause for 2 seconds after printing
